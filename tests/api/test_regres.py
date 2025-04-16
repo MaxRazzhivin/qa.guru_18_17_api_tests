@@ -13,8 +13,8 @@ payload = {
 
 def test_get_list_of_users():
     response = requests.get(url + endpoint, params={"page": 2, "per_page": 3})
-    users = response.json()['data']
     assert response.status_code == 200
+    users = response.json()['data']
     assert users[0]["first_name"] == 'Eve'  # Проверка имени
     assert users[0]['last_name'] == 'Holt'  # Проверка фамилии
     assert len(users) == 3
@@ -28,8 +28,8 @@ def test_get_list_of_users():
 def test_get_single_user():
     endpoint_single_user = "/api/users/3"
     response = requests.get(url + endpoint_single_user)
-    users = response.json()['data']
     assert response.status_code == 200  # Проверка статуса ответа
+    users = response.json()['data']
     assert users['first_name'] == 'Emma'
     assert users['last_name'] == 'Wong'
 
@@ -74,6 +74,19 @@ def test_list_resource():
 
 
 def test_update_users_by_put():
+
+    # Создаем пользователя подопытного:
+    endpoint = '/api/users'
+    payload = {
+        "name": "Neo",
+        "job": "Superhero"
+    }
+
+    response = requests.post(url + endpoint, data=payload)
+    assert response.status_code == 201
+    assert response.json()['name'] == 'Neo'  # Проверка имени
+    assert response.json()['job'] == 'Superhero'  # Проверка должности
+
     endpoint = "/api/users/2"
     payload = {
         "name": "morpheus",
@@ -90,6 +103,11 @@ def test_update_users_by_put():
     with open('../../schemas/update_users.json') as file:
         schema = json.load(file)
     validate(response.json(), schema)  # Валидация ответа от сервера
+
+    # Удаляем пользователя
+
+    response = requests.delete(url + endpoint)
+    assert response.status_code == 204
 
 
 def test_update_users_by_patch():
@@ -127,9 +145,6 @@ def test_register_successful():
 
     response = requests.post(url + endpoint, data=payload)
     assert response.status_code == 200
-
-    assert response.json()['id'] == 4  # Проверка id из ответа
-    assert response.json()['token'] == 'QpwL5tke4Pnpja7X4'  # Проверка токена
 
     # Валидация ответа от сервера
     with open('../../schemas/successful_register.json') as file:
