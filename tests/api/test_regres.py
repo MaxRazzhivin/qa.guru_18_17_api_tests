@@ -145,6 +145,7 @@ def test_register_unsuccessful():
 
     response = requests.post(url + endpoint, data=payload)
     assert response.status_code == 400
+    assert response.json()['error'] == 'Missing password'
 
     # Валидация ответа от сервера
     with open('../../schemas/unsuccessful_register.json') as file:
